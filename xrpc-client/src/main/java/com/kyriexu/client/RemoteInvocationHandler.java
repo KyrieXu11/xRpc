@@ -30,8 +30,6 @@ public class RemoteInvocationHandler implements InvocationHandler {
         Request request = new Request();
         request.setMethodName(method.getName());
         request.setArgs(args);
-        System.out.println(method.getName());
-        System.out.println(args);
         RpcTransport transport = new RpcTransport(host, port);
         return transport.sendRequest(request);
     }

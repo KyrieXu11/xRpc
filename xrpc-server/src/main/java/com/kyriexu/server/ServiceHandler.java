@@ -10,7 +10,6 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,8 +36,8 @@ public class ServiceHandler implements Runnable {
     @Override
     public void run() {
         log.info("{}：开始处理", Thread.currentThread().getName());
-        ObjectInputStream in;
-        ObjectOutputStream out;
+        ObjectInputStream in = null;
+        ObjectOutputStream out = null;
         try {
             in = new ObjectInputStream(socket.getInputStream());
             // 读取参数
@@ -47,12 +46,6 @@ public class ServiceHandler implements Runnable {
             out = new ObjectOutputStream(socket.getOutputStream());
             // 返回结果
             out.writeObject(obj);
-
-            // 关闭流
-            // in.close();
-            // out.close();
-            // socket.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -63,27 +56,34 @@ public class ServiceHandler implements Runnable {
             log.error("非法的访问权限");
         } catch (InvocationTargetException e) {
             log.error("目标执行错误");
+        }finally {
+            // 关闭流
+            try {
+                assert in != null;
+                in.close();
+
+                assert out != null;
+                out.close();
+
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private Object invoke(Request request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Object[] args = request.getArgs();
         Method method;
+        Class<?>[] parameterTypes = null;
         if (args != null){
             // 获取参数的类型
-            Class<?>[] parameterTypes = new Class[args.length];
+             parameterTypes = new Class[args.length];
             for (int i = 0; i < args.length; i++) {
                 parameterTypes[i] = args[i].getClass();
             }
-            System.out.println(Arrays.toString(parameterTypes));
-            method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
-            return method.invoke(service, args);
-        }else {
-            System.out.println(request.toString());
-            method = service.getClass().getMethod(request.getClassName());
-            Object invoke = method.invoke(service);
-            System.out.println(invoke);
-            return invoke;
         }
+        method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
+        return method.invoke(service,args);
     }
 }
