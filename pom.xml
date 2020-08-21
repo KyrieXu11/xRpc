@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kyriexu</groupId>
+    <groupId>com.com.kyriexu</groupId>
     <artifactId>xRpc</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -12,13 +12,25 @@
         <module>xrpc-server</module>
         <module>xrpc-common</module>
         <module>xrpc-client</module>
+        <module>netty-demo</module>
     </modules>
 
     <properties>
         <java.version>11</java.version>
         <lombok.version>1.18.12</lombok.version>
         <sl4j.version>1.0.13.5</sl4j.version>
+        <netty.version>4.1.51.Final</netty.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
