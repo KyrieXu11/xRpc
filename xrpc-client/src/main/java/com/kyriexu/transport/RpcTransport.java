@@ -1,6 +1,14 @@
 package com.kyriexu.transport;
 
 import com.kyriexu.enity.Request;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
@@ -26,20 +35,37 @@ public class RpcTransport {
     private String host;
     private int port;
 
-    public Object sendRequest(Request request){
-        logger.info("send");
-        Socket socket;
+    private class ClientHandler extends ChannelInboundHandlerAdapter{
+        public Object data;
+        // TODO: 写业务逻辑
+
+    }
+
+    public Object sendRequest(Request request) throws Exception{
+        EventLoopGroup group = new NioEventLoopGroup();
         try {
-            socket = new Socket(host,port);
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(request);
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            return in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error("出异常啦");
-            e.printStackTrace();
+            Bootstrap b = new Bootstrap();                //1
+            ClientHandler handler = new ClientHandler();
+            b.group(group)                                //2
+                    .channel(NioSocketChannel.class)            //3
+                    .remoteAddress(new InetSocketAddress(host, port))    //4
+                    .handler(new ChannelInitializer<SocketChannel>() {    //5
+                        @Override
+                        public void initChannel(SocketChannel ch)
+                                throws Exception {
+                            ch.pipeline().addLast(
+                                    handler);
+                        }
+                    });
+
+            ChannelFuture f = b.connect().sync();        //6
+
+            f.channel().closeFuture().sync();            //7
+
+            return handler.data;
+        } finally {
+            group.shutdownGracefully().sync();            //8
         }
-        return null;
     }
 
 }

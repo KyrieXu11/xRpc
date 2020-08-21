@@ -12,7 +12,7 @@
         <module>xrpc-server</module>
         <module>xrpc-common</module>
         <module>xrpc-client</module>
-        <module>netty-demo</module>
+        <module>xrpc-codec</module>
     </modules>
 
     <properties>
@@ -20,6 +20,7 @@
         <lombok.version>1.18.12</lombok.version>
         <sl4j.version>1.0.13.5</sl4j.version>
         <netty.version>4.1.51.Final</netty.version>
+        <fastjson.version>1.2.73</fastjson.version>
     </properties>
 
     <dependencyManagement>
@@ -28,6 +29,11 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
