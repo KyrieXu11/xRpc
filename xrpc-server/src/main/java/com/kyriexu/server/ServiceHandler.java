@@ -1,23 +1,19 @@
 package com.kyriexu.server;
 
-import com.kyriexu.codec.Decoder;
-import com.kyriexu.codec.impl.JSONDecoder;
+import com.kyriexu.codec.utils.ConvertUtils;
 import com.kyriexu.enity.Request;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,12 +21,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author KyrieXu
  * @since 2020/8/20 19:02
  **/
+@ChannelHandler.Sharable
 public class ServiceHandler extends ChannelInboundHandlerAdapter {
     public static final Logger log = LoggerFactory.getLogger(ServiceHandler.class);
 
     private Map<String, Object> registry = new ConcurrentHashMap<>();
 
     public ServiceHandler(Object service) {
+        super();
         this.service = service;
     }
 
@@ -50,8 +48,6 @@ public class ServiceHandler extends ChannelInboundHandlerAdapter {
         method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
         return method.invoke(service,args);
     }
-
-
     /**
      * 处理的主要逻辑
      * @param ctx 上下文，负责读写字节流
@@ -60,14 +56,13 @@ public class ServiceHandler extends ChannelInboundHandlerAdapter {
     @SneakyThrows
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg /* 传递过来的对象 */) {
-        ByteBuf in = (ByteBuf) msg;
-        // 读取字节
-        byte[] bytes = new byte[in.readableBytes()];
-        Decoder decoder = new JSONDecoder();
-        Request request = decoder.decode(bytes, Request.class);
+        Request request = ConvertUtils.BufToByte(msg, Request.class);
+
         Object res = invoke(request);
-        // 返回结果
-        ctx.writeAndFlush(res);
+
+        ByteBuf outBuf = ConvertUtils.ObjectToBuf(res);
+
+        ctx.writeAndFlush(outBuf);
     }
 
     @Override

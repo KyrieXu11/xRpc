@@ -39,6 +39,7 @@ public class ServerRpcProxy {
         NioEventLoopGroup group = new NioEventLoopGroup(); //3
         try {
             ServerBootstrap b = new ServerBootstrap();
+            ServiceHandler handler = new ServiceHandler(service);
             b.group(group)                                //4
                     .channel(NioServerSocketChannel.class)        //5
                     .localAddress(new InetSocketAddress(port))    //6
@@ -46,8 +47,8 @@ public class ServerRpcProxy {
                         @Override
                         public void initChannel(SocketChannel ch)
                                 throws Exception {
-                            ch.pipeline().addLast(
-                                    new ServiceHandler(service));
+                            ch.pipeline()
+                                    .addLast(handler);
                         }
                     });
             ChannelFuture f = b.bind().sync();            //8
