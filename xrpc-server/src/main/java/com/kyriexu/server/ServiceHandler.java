@@ -1,8 +1,7 @@
 package com.kyriexu.server;
 
-import com.kyriexu.codec.utils.ConvertUtils;
 import com.kyriexu.enity.Request;
-import io.netty.buffer.ByteBuf;
+import com.kyriexu.enity.Response;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -26,43 +25,45 @@ public class ServiceHandler extends ChannelInboundHandlerAdapter {
     public static final Logger log = LoggerFactory.getLogger(ServiceHandler.class);
 
     private Map<String, Object> registry = new ConcurrentHashMap<>();
+    private Object service;
 
     public ServiceHandler(Object service) {
         super();
         this.service = service;
     }
 
-    private Object service;
-
-    private Object invoke(Request request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private Response invoke(Request request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Object[] args = request.getArgs();
         Method method;
         Class<?>[] parameterTypes = null;
-        if (args != null){
+        if (args != null) {
             // 获取参数的类型
-             parameterTypes = new Class[args.length];
+            parameterTypes = new Class[args.length];
             for (int i = 0; i < args.length; i++) {
                 parameterTypes[i] = args[i].getClass();
             }
         }
         method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
-        return method.invoke(service,args);
+        Object data = method.invoke(service, args);
+        return new Response(method.getReturnType(), data);
     }
+
     /**
      * 处理的主要逻辑
+     *
      * @param ctx 上下文，负责读写字节流
      * @param msg 传递对象
      */
     @SneakyThrows
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg /* 传递过来的对象 */) {
-        Request request = ConvertUtils.BufToByte(msg, Request.class);
+        // 有了解码编码器直接强转
+        Request request = ((Request) msg);
 
-        Object res = invoke(request);
-
-        ByteBuf outBuf = ConvertUtils.ObjectToBuf(res);
-
-        ctx.writeAndFlush(outBuf);
+        Response res = invoke(request);
+        if (!"void".equals(res.getReturnType().toString()))
+            // 编码器直接发送
+            ctx.writeAndFlush(res);
     }
 
     @Override
@@ -74,6 +75,7 @@ public class ServiceHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 捕捉异常的方法
+     *
      * @param ctx
      * @param cause
      */

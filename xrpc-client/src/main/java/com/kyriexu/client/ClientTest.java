@@ -10,7 +10,7 @@ public class ClientTest {
     public static void main(String[] args) {
         ClientRpcProxy proxy = new ClientRpcProxy();
         HelloService helloService = ((HelloService) proxy.getService(HelloService.class, "127.0.0.1", 8080));
-        helloService.say();
+        // helloService.say();
         System.out.println(helloService.add(1, 2));
     }
 }
