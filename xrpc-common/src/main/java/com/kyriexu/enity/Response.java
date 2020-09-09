@@ -14,6 +14,13 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class Response {
+    private String id;
+
+    public Response(Class<?> returnType, Object result) {
+        this.returnType = returnType;
+        this.result = result;
+    }
+
     private Class<?> returnType;
     private Object result;
 }

@@ -1,6 +1,7 @@
 package com.kyriexu.client;
 
 import com.kyriexu.enity.Request;
+import com.kyriexu.enity.Response;
 import com.kyriexu.transport.RpcTransport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * @author KyrieXu
@@ -30,7 +32,11 @@ public class RemoteInvocationHandler implements InvocationHandler {
         Request request = new Request();
         request.setMethodName(method.getName());
         request.setArgs(args);
+        request.setId(UUID.randomUUID().toString());
         RpcTransport transport = new RpcTransport(host, port);
-        return transport.sendRequest(request);
+        Response response = (Response) transport.sendRequest(request);
+        // 关闭连接
+        transport.close();
+        return response.getResult();
     }
 }

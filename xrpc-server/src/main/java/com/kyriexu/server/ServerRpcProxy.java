@@ -5,52 +5,62 @@ import com.kyriexu.codec.impl.JSONEncoder;
 import com.kyriexu.codec.netty.NettyDecoder;
 import com.kyriexu.codec.netty.NettyEncoder;
 import com.kyriexu.enity.Request;
+import com.kyriexu.singleton.SingletonFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author KyrieXu
  * @since 2020/8/20 18:57
  **/
+@Slf4j
 public class ServerRpcProxy {
-    public static final Logger logger = LoggerFactory.getLogger(ServerRpcProxy.class);
+    private NioEventLoopGroup boss;
+    private NioEventLoopGroup worker;
+    private ServerBootstrap server;
+    private ServiceHandler handler;
 
-    private ExecutorService threadPool = Executors.newFixedThreadPool(3);
+    public ServerRpcProxy() {
+        handler = SingletonFactory.getInstance(ServiceHandler.class);
+        boss = new NioEventLoopGroup();
+        worker = new NioEventLoopGroup();
+        server = new ServerBootstrap();
+        server.group(boss, worker)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .channel(NioServerSocketChannel.class)
+                // 表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁
+                // 服务器处理创建新连接较慢，可以适当调大这个参数
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childHandler(new ChannelInitializer<SocketChannel>() { //7
+                    @Override
+                    public void initChannel(SocketChannel ch)
+                            throws Exception {
+                        ch.pipeline()
+                                .addLast(new NettyEncoder(new JSONEncoder()))
+                                .addLast(new NettyDecoder(new JSONDecoder(), Request.class))
+                                .addLast(handler);
+                    }
+                });
+    }
 
     public void publishService(Object service, int port) throws Exception {
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup(); //3
-        // NioEventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            ServerBootstrap server = new ServerBootstrap();
-            ServiceHandler handler = new ServiceHandler(service);
-            server.group(bossGroup)                                //4
-                    .channel(NioServerSocketChannel.class)        //5
-                    .localAddress(new InetSocketAddress(port))    //6
-                    .childHandler(new ChannelInitializer<SocketChannel>() { //7
-                        @Override
-                        public void initChannel(SocketChannel ch)
-                                throws Exception {
-                            ch.pipeline()
-                                    .addLast(new NettyEncoder(new JSONEncoder()))
-                                    .addLast(new NettyDecoder(new JSONDecoder(), Request.class))
-                                    .addLast(handler);
-                        }
-                    });
-            ChannelFuture f = server.bind().sync();            //8
+            handler.setService(service);
+            server.localAddress(new InetSocketAddress(port));
+            ChannelFuture f = server.bind().sync();
             System.out.println(ServerRpcProxy.class.getName() + " 开始监听 " + f.channel().localAddress());
-            f.channel().closeFuture().sync();            //9
+            f.channel().closeFuture().sync();
         } finally {
-            bossGroup.shutdownGracefully().sync();            //10
+            boss.shutdownGracefully().sync();
+            worker.shutdownGracefully().sync();
         }
     }
 }

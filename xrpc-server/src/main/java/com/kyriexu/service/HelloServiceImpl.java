@@ -6,11 +6,6 @@ package com.kyriexu.service;
  **/
 public class HelloServiceImpl implements HelloService {
     @Override
-    public void say() {
-        System.out.println("你好呀");
-    }
-
-    @Override
     public int add(Integer a, Integer b) {
         return a + b;
     }

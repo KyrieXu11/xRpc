@@ -15,7 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class Request implements Serializable {
     private static final long serialVersionUID = -2914888719171132007L;
-
+    private String id;
     private String methodName;
     private String className;
     private Object[] args;
