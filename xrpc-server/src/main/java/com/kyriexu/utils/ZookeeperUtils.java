@@ -64,6 +64,7 @@ public class ZookeeperUtils {
     }
 
     private static CuratorFramework setZkClient(String addr) {
+        System.out.println(addr);
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             return zkClient;
         }
@@ -110,17 +111,22 @@ public class ZookeeperUtils {
 
     public static void createPersistentNode(CuratorFramework zkClient, String path) {
         try {
+            if(zkClient.getState() != CuratorFrameworkState.STARTED)
+                zkClient.start();
             if (REGISTERED_PATH_SET.contains(path) || zkClient.checkExists().forPath(path) != null) {
                 log.info("The node already exists. The node is:[{}]", path);
             } else {
-                //eg: /my-rpc/github.javaguide.HelloService/127.0.0.1:9999
                 zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path);
                 log.info("The node was created successfully. The node is:[{}]", path);
             }
             REGISTERED_PATH_SET.add(path);
         } catch (Exception e) {
             // throw new RpcException(e.getMessage(), e.getCause());
-            throw new RuntimeException("");
+            throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public static void close(CuratorFramework zkClient){
+        zkClient.close();
     }
 }

@@ -1,8 +1,8 @@
 package com.kyriexu.transport;
 
 import com.kyriexu.client.ClientHandler;
-import com.kyriexu.codec.impl.JSONDecoder;
-import com.kyriexu.codec.impl.JSONEncoder;
+import com.kyriexu.codec.json.JSONDecoder;
+import com.kyriexu.codec.json.JSONEncoder;
 import com.kyriexu.codec.netty.NettyDecoder;
 import com.kyriexu.codec.netty.NettyEncoder;
 import com.kyriexu.enity.Request;
@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**

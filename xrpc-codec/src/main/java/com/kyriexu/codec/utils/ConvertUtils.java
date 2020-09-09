@@ -2,8 +2,8 @@ package com.kyriexu.codec.utils;
 
 import com.kyriexu.codec.Decoder;
 import com.kyriexu.codec.Encoder;
-import com.kyriexu.codec.impl.JSONDecoder;
-import com.kyriexu.codec.impl.JSONEncoder;
+import com.kyriexu.codec.json.JSONDecoder;
+import com.kyriexu.codec.json.JSONEncoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

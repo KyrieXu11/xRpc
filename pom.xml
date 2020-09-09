@@ -23,6 +23,7 @@
         <fastjson.version>1.2.73</fastjson.version>
         <junit.version>5.6.2</junit.version>
         <curator-version>4.2.0</curator-version>
+        <reflections.version>0.9.12</reflections.version>
     </properties>
 
     <dependencyManagement>
@@ -37,6 +38,12 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

@@ -1,11 +1,15 @@
 package com.kyriexu.server;
 
-import com.kyriexu.codec.impl.JSONDecoder;
-import com.kyriexu.codec.impl.JSONEncoder;
+import com.kyriexu.annotation.RpcService;
+import com.kyriexu.codec.json.JSONDecoder;
+import com.kyriexu.codec.json.JSONEncoder;
 import com.kyriexu.codec.netty.NettyDecoder;
 import com.kyriexu.codec.netty.NettyEncoder;
 import com.kyriexu.enity.Request;
+import com.kyriexu.registry.ServiceRegistry;
+import com.kyriexu.registry.impl.ZkServiceRegistry;
 import com.kyriexu.singleton.SingletonFactory;
+import com.kyriexu.utils.AnnotationUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -13,9 +17,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 /**
  * @author KyrieXu
@@ -23,6 +29,7 @@ import java.net.InetSocketAddress;
  **/
 @Slf4j
 public class ServerRpcProxy {
+    private final int port = 8080;
     private NioEventLoopGroup boss;
     private NioEventLoopGroup worker;
     private ServerBootstrap server;
@@ -41,14 +48,25 @@ public class ServerRpcProxy {
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childHandler(new ChannelInitializer<SocketChannel>() { //7
                     @Override
-                    public void initChannel(SocketChannel ch)
-                            throws Exception {
+                    public void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
                                 .addLast(new NettyEncoder(new JSONEncoder()))
                                 .addLast(new NettyDecoder(new JSONDecoder(), Request.class))
                                 .addLast(handler);
                     }
                 });
+    }
+
+    @SneakyThrows
+    public void run(Class<?> clazz) {
+        Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
+        // 测试通过
+        publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
+        // TODO:注册到Zookeeper中去
+        ServiceRegistry serviceRegistry = new ZkServiceRegistry();
+        for (String serviceName : instance.keySet()) {
+            serviceRegistry.registerService(new InetSocketAddress(port), serviceName);
+        }
     }
 
     public void publishService(Object service, int port) throws Exception {

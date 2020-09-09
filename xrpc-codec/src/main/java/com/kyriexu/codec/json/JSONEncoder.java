@@ -1,4 +1,4 @@
-package com.kyriexu.codec.impl;
+package com.kyriexu.codec.json;
 
 import com.alibaba.fastjson.JSON;
 import com.kyriexu.codec.Encoder;
