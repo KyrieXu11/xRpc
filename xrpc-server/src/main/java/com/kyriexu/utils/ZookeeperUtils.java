@@ -64,7 +64,6 @@ public class ZookeeperUtils {
     }
 
     private static CuratorFramework setZkClient(String addr) {
-        System.out.println(addr);
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             return zkClient;
         }

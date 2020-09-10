@@ -1,4 +1,4 @@
-package com.kyriexu.registry.impl;
+package com.kyriexu.registry.registryImpl;
 
 import com.kyriexu.registry.ServiceRegistry;
 

@@ -1,4 +1,4 @@
-package com.kyriexu.registry.impl;
+package com.kyriexu.registry.registryImpl;
 
 
 import com.kyriexu.registry.ServiceRegistry;
@@ -17,7 +17,7 @@ public class ZkServiceRegistry implements ServiceRegistry {
     @SneakyThrows
     @Override
     public void registerService(InetSocketAddress address, String serviceName) {
-        String servicePath = ZookeeperUtils.ZK_REGISTER_ROOT_PATH + "/" + serviceName + "/" + address.toString();
+        String servicePath = ZookeeperUtils.ZK_REGISTER_ROOT_PATH + "/" + serviceName + address.getAddress() + ":" + address.getPort();
         CuratorFramework zkClient = ZookeeperUtils.getZkClient();
         ZookeeperUtils.createPersistentNode(zkClient,servicePath);
     }

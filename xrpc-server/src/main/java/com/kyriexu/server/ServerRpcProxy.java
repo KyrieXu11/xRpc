@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
@@ -73,7 +74,7 @@ public class ServerRpcProxy {
         // publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
         // TODO:注册到Zookeeper中去
         ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
-        serviceRegistry.registerService(new InetSocketAddress(8080),"serviceName");
+        serviceRegistry.registerService(new InetSocketAddress("127.0.0.1",8080),"serviceName");
         // ServiceRegistry serviceRegistry = new ZkServiceRegistry();
         // for (String serviceName : instance.keySet()) {
         //     serviceRegistry.registerService(new InetSocketAddress(port), serviceName);

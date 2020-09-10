@@ -1,1 +1,1 @@
-com.kyriexu.registry.impl.TestServiceRegistry
+com.kyriexu.registry.registryImpl.ZkServiceRegistry

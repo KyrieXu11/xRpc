@@ -12,7 +12,6 @@ import java.lang.annotation.Annotation;
 public class ReflectionUtils {
     public static String getScanPackage(Class<?> clazz, Class<? extends Annotation> aClazz) throws NoSuchMethodException {
         Annotation annotation = clazz.getAnnotation(aClazz);
-        System.out.println(annotation.annotationType());
         if(annotation.annotationType() == RpcScan.class){
             return clazz.getAnnotation(RpcScan.class).basePackage();
         }else if (annotation.annotationType() == SpiScan.class){
