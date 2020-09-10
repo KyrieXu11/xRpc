@@ -1,6 +1,6 @@
 package com.kyriexu.service;
 
-import com.kyriexu.annotation.RpcService;
+import com.kyriexu.annotation.rpc.RpcService;
 
 /**
  * @author KyrieXu

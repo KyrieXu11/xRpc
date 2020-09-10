@@ -1,6 +1,6 @@
 package com.kyriexu.utils;
 
-import com.kyriexu.annotation.RpcScan;
+import com.kyriexu.annotation.rpc.RpcScan;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
@@ -21,7 +21,7 @@ public class AnnotationUtils {
      * @return
      */
     public static Set<Class<?>> getAllClass(Class<?> aClazz, Class<? extends Annotation> clazz) throws NoSuchMethodException {
-        String packageName = getScanPackage(aClazz);
+        String packageName = getBasePackage(aClazz);
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(clazz);
     }
@@ -48,14 +48,7 @@ public class AnnotationUtils {
         return map;
     }
 
-    /**
-     * 通过RpcScan来扫描给定的扫描的包。
-     * @param clazz 使用RpcScan 注解的类
-     * @return basepackage
-     * @throws NoSuchMethodException
-     */
-    private static String getScanPackage(Class<?> clazz) throws NoSuchMethodException {
-        RpcScan rpcScan = clazz.getAnnotation(RpcScan.class);
-        return rpcScan.basePackage();
+    public static String getBasePackage(Class<?> aClazz) throws NoSuchMethodException {
+        return ReflectionUtils.getScanPackage(aClazz,RpcScan.class);
     }
 }

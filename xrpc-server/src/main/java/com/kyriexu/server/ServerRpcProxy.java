@@ -1,15 +1,16 @@
 package com.kyriexu.server;
 
-import com.kyriexu.annotation.RpcService;
+import com.kyriexu.annotation.rpc.RpcService;
+import com.kyriexu.annotation.service.SPI;
 import com.kyriexu.codec.json.JSONDecoder;
 import com.kyriexu.codec.json.JSONEncoder;
 import com.kyriexu.codec.netty.NettyDecoder;
 import com.kyriexu.codec.netty.NettyEncoder;
 import com.kyriexu.enity.Request;
 import com.kyriexu.registry.ServiceRegistry;
-import com.kyriexu.registry.impl.ZkServiceRegistry;
 import com.kyriexu.singleton.SingletonFactory;
 import com.kyriexu.utils.AnnotationUtils;
+import com.kyriexu.utils.SpiUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -17,6 +18,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +31,9 @@ import java.util.Map;
  **/
 @Slf4j
 public class ServerRpcProxy {
-    private final int port = 8080;
+    @Setter
+    private int port = 8080;
+
     private NioEventLoopGroup boss;
     private NioEventLoopGroup worker;
     private ServerBootstrap server;
@@ -57,19 +61,26 @@ public class ServerRpcProxy {
                 });
     }
 
+    public ServerRpcProxy(int port) {
+        this();
+        this.port = port;
+    }
+
     @SneakyThrows
     public void run(Class<?> clazz) {
         Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
         // 测试通过
-        publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
+        // publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
         // TODO:注册到Zookeeper中去
-        ServiceRegistry serviceRegistry = new ZkServiceRegistry();
-        for (String serviceName : instance.keySet()) {
-            serviceRegistry.registerService(new InetSocketAddress(port), serviceName);
-        }
+        ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
+        serviceRegistry.registerService(new InetSocketAddress(8080),"serviceName");
+        // ServiceRegistry serviceRegistry = new ZkServiceRegistry();
+        // for (String serviceName : instance.keySet()) {
+        //     serviceRegistry.registerService(new InetSocketAddress(port), serviceName);
+        // }
     }
 
-    public void publishService(Object service, int port) throws Exception {
+    private void publishService(Object service, int port) throws Exception {
         try {
             handler.setService(service);
             server.localAddress(new InetSocketAddress(port));
