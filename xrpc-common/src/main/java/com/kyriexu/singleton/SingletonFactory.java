@@ -13,7 +13,7 @@ public class SingletonFactory {
     private SingletonFactory(){
     }
 
-    public static  <T> T getInstance(Class<T> clazz){
+    public synchronized static  <T> T getInstance(Class<T> clazz){
         Object instance = map.get(clazz.toGenericString());
         try {
             if(instance == null){

@@ -1,7 +1,7 @@
 package com.kyriexu.service;
 
-import com.kyriexu.annotation.rpc.RpcScan;
-import com.kyriexu.annotation.service.SpiScan;
+import com.kyriexu.annotation.RpcScan;
+import com.kyriexu.spi.SpiScan;
 import com.kyriexu.server.ServerRpcProxy;
 
 /**

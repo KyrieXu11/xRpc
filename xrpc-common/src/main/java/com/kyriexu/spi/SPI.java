@@ -1,4 +1,4 @@
-package com.kyriexu.annotation.service;
+package com.kyriexu.spi;
 
 import java.lang.annotation.*;
 

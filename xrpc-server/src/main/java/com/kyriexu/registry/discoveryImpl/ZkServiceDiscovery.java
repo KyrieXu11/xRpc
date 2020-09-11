@@ -18,7 +18,11 @@ public class ZkServiceDiscovery implements ServiceDiscovery {
     public InetSocketAddress discoverService(String serviceName) {
         CuratorFramework zkClient = ZookeeperUtils.getZkClient();
         List<String> nodes = ZookeeperUtils.getChildrenNodes(zkClient, serviceName);
-        System.out.println(nodes);
-        return null;
+        if(nodes.size() == 0){
+            throw new RuntimeException("没有找到对应的服务");
+        }
+        String[] addrPort = nodes.get(0).split(":");
+        int port = Integer.parseInt(addrPort[1]);
+        return new InetSocketAddress(addrPort[0],port);
     }
 }

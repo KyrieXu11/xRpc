@@ -1,7 +1,6 @@
 package com.kyriexu.utils;
 
-import com.kyriexu.annotation.rpc.RpcScan;
-import com.kyriexu.annotation.service.SPI;
+import com.kyriexu.annotation.RpcScan;
 import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
@@ -48,7 +47,6 @@ public class AnnotationUtils {
         }
         return map;
     }
-
 
     public static String getBasePackage(Class<?> aClazz) throws NoSuchMethodException {
         return ReflectionUtils.getScanPackage(aClazz,RpcScan.class);

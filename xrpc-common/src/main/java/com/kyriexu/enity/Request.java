@@ -19,4 +19,9 @@ public class Request implements Serializable {
     private String methodName;
     private String className;
     private Object[] args;
+    private Class<?>[] parameterTypes;
+
+    public String getServiceName(){
+        return className + methodName;
+    }
 }

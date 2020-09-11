@@ -8,13 +8,18 @@ import com.kyriexu.codec.netty.NettyEncoder;
 import com.kyriexu.enity.Request;
 import com.kyriexu.enity.Response;
 import com.kyriexu.future.ResponseMap;
+import com.kyriexu.registry.ServiceDiscovery;
 import com.kyriexu.singleton.SingletonFactory;
+import com.kyriexu.utils.SpiUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +31,20 @@ import java.util.concurrent.CompletableFuture;
  * @author KyrieXu
  * @since 2020/8/20 20:04
  **/
-@Data
 @Slf4j
+@NoArgsConstructor
 public class RpcTransport {
     public static final Logger logger = LoggerFactory.getLogger(RpcTransport.class);
-
+    @Setter
+    @Getter
     private String host;
+
+    @Setter
+    @Getter
+    private Class<?> aClazz;
+
+    @Setter
+    @Getter
     private int port;
     private ResponseMap map;
     private EventLoopGroup boss;
@@ -48,7 +61,6 @@ public class RpcTransport {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .option(ChannelOption.SO_KEEPALIVE,true)
-                .remoteAddress(new InetSocketAddress(host, port))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
@@ -62,6 +74,10 @@ public class RpcTransport {
     }
 
     public Object sendRequest(Request request) throws Exception {
+        ServiceDiscovery discovery = SpiUtils.getServiceDiscovery(aClazz);
+        InetSocketAddress socketAddress = discovery.discoverService(request.getServiceName());
+        b.remoteAddress(socketAddress);
+
         ChannelFuture f = b.connect().sync();
 
         CompletableFuture<Response> completableFuture = new CompletableFuture<>();

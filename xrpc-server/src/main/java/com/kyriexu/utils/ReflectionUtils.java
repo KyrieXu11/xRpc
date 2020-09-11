@@ -1,7 +1,7 @@
 package com.kyriexu.utils;
 
-import com.kyriexu.annotation.rpc.RpcScan;
-import com.kyriexu.annotation.service.SpiScan;
+import com.kyriexu.annotation.RpcScan;
+import com.kyriexu.spi.SpiScan;
 
 import java.lang.annotation.Annotation;
 

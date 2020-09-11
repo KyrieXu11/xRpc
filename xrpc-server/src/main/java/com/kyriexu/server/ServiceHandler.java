@@ -10,6 +10,8 @@ import lombok.SneakyThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author KyrieXu
@@ -20,20 +22,16 @@ public class ServiceHandler extends ChannelInboundHandlerAdapter {
     @Setter
     private Object service;
 
+    private Map<String,Object> registry;
+
     public ServiceHandler() {
+        registry = new ConcurrentHashMap<>();
     }
 
     private Response invoke(Request request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Object[] args = request.getArgs();
         Method method;
-        Class<?>[] parameterTypes = null;
-        if (args != null) {
-            // 获取参数的类型
-            parameterTypes = new Class[args.length];
-            for (int i = 0; i < args.length; i++) {
-                parameterTypes[i] = args[i].getClass();
-            }
-        }
+        Class<?>[] parameterTypes = request.getParameterTypes();
         method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
         Object data = method.invoke(service, args);
         return new Response(request.getId(),method.getReturnType(), data);

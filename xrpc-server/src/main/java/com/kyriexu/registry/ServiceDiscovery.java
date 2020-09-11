@@ -1,6 +1,6 @@
 package com.kyriexu.registry;
 
-import com.kyriexu.annotation.service.SPI;
+import com.kyriexu.spi.SPI;
 
 import java.net.InetSocketAddress;
 

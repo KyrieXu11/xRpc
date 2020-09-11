@@ -1,9 +1,9 @@
 package com.kyriexu.utils;
 
-import com.kyriexu.annotation.service.SPI;
-import com.kyriexu.annotation.service.SpiScan;
 import com.kyriexu.registry.ServiceDiscovery;
 import com.kyriexu.registry.ServiceRegistry;
+import com.kyriexu.spi.SPI;
+import com.kyriexu.spi.SpiScan;
 import org.reflections.Reflections;
 
 import java.util.HashMap;
@@ -16,6 +16,14 @@ import java.util.Set;
  * @since 2020/9/10 10:40
  **/
 public class SpiUtils {
+    public static ServiceRegistry getServiceRegistry(Class<?> aClazz) throws NoSuchMethodException {
+        return ((ServiceRegistry) getSpi(aClazz, "ServiceRegistry"));
+    }
+
+    public static ServiceDiscovery getServiceDiscovery(Class<?> aClazz) throws NoSuchMethodException {
+        return ((ServiceDiscovery) getSpi(aClazz, "ServiceDiscovery"));
+    }
+
 
     private static Map<String,Class<?>> getMap(Class<?> aClazz) throws NoSuchMethodException {
         String scanPackage = ReflectionUtils.getScanPackage(aClazz, SpiScan.class);
@@ -27,10 +35,6 @@ public class SpiUtils {
                 map.put(aClass.getSimpleName(),aClass);
         }
         return map;
-    }
-
-    public static ServiceRegistry getServiceRegistry(Class<?> aClazz) throws NoSuchMethodException {
-        return ((ServiceRegistry) getSpi(aClazz, "ServiceRegistry"));
     }
 
     private static Object getSpi(Class<?> aClazz, String name) throws NoSuchMethodException {
@@ -51,9 +55,5 @@ public class SpiUtils {
             }
         }
         throw new RuntimeException("未知异常");
-    }
-
-    public static ServiceDiscovery getServiceDiscovery(Class<?> aClazz) throws NoSuchMethodException {
-        return ((ServiceDiscovery) getSpi(aClazz, "ServiceDiscovery"));
     }
 }

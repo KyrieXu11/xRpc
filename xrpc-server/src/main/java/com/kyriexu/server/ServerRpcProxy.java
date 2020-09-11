@@ -1,7 +1,6 @@
 package com.kyriexu.server;
 
-import com.kyriexu.annotation.rpc.RpcService;
-import com.kyriexu.annotation.service.SPI;
+import com.kyriexu.annotation.RpcService;
 import com.kyriexu.codec.json.JSONDecoder;
 import com.kyriexu.codec.json.JSONEncoder;
 import com.kyriexu.codec.netty.NettyDecoder;
@@ -22,7 +21,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
@@ -34,6 +32,9 @@ import java.util.Map;
 public class ServerRpcProxy {
     @Setter
     private int port = 8080;
+
+    @Setter
+    private String addr = "127.0.0.1";
 
     private NioEventLoopGroup boss;
     private NioEventLoopGroup worker;
@@ -72,9 +73,11 @@ public class ServerRpcProxy {
         Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
         // 测试通过
         // publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
-        // TODO:注册到Zookeeper中去
         ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
-        serviceRegistry.registerService(new InetSocketAddress("127.0.0.1",8080),"serviceName");
+        for (String serviceName : instance.keySet()) {
+            serviceRegistry.registerService(new InetSocketAddress(addr,8080),serviceName);
+        }
+        // TODO:注册到Zookeeper中去
         // ServiceRegistry serviceRegistry = new ZkServiceRegistry();
         // for (String serviceName : instance.keySet()) {
         //     serviceRegistry.registerService(new InetSocketAddress(port), serviceName);

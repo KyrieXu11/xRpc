@@ -1,4 +1,4 @@
-package com.kyriexu.annotation.rpc;
+package com.kyriexu.annotation;
 
 import java.lang.annotation.*;
 
