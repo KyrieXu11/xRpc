@@ -13,12 +13,18 @@ import java.net.InetSocketAddress;
  * @since 2020/9/8 22:10
  **/
 public class ZkServiceRegistry implements ServiceRegistry {
+    private CuratorFramework zkClient;
 
     @SneakyThrows
     @Override
     public void registerService(InetSocketAddress address, String serviceName) {
         String servicePath = ZookeeperUtils.ZK_REGISTER_ROOT_PATH + "/" + serviceName + address.getAddress() + ":" + address.getPort();
-        CuratorFramework zkClient = ZookeeperUtils.getZkClient();
+        zkClient = ZookeeperUtils.getZkClient();
         ZookeeperUtils.createPersistentNode(zkClient,servicePath);
+    }
+
+    @Override
+    public void close(){
+        ZookeeperUtils.close(zkClient);
     }
 }

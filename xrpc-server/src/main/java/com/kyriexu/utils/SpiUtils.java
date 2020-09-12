@@ -46,9 +46,6 @@ public class SpiUtils {
             if(!name.equals(key))
                 continue;
             Class<?> aClass = map.get(key);
-            if (aClass.getDeclaredMethods().length != 1) {
-                throw new RuntimeException("SPI注解只能加在服务注册接口上！");
-            }
             ServiceLoader<?> load = ServiceLoader.load(aClass);
             for (Object o : load) {
                 return o;

@@ -11,4 +11,6 @@ import java.net.InetSocketAddress;
 @SPI
 public interface ServiceRegistry {
     void registerService(InetSocketAddress address,String serviceName);
+
+    void close();
 }

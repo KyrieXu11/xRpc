@@ -16,9 +16,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -32,7 +30,6 @@ import java.util.concurrent.CompletableFuture;
  * @since 2020/8/20 20:04
  **/
 @Slf4j
-@NoArgsConstructor
 public class RpcTransport {
     public static final Logger logger = LoggerFactory.getLogger(RpcTransport.class);
     @Setter
@@ -50,9 +47,7 @@ public class RpcTransport {
     private EventLoopGroup boss;
     private Bootstrap b;
 
-    public RpcTransport(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public RpcTransport() {
         map = SingletonFactory.getInstance(ResponseMap.class);
         boss = new NioEventLoopGroup();
         b = new Bootstrap();
@@ -70,12 +65,16 @@ public class RpcTransport {
                                 .addLast(handler);
                     }
                 });
+    }
 
+    public RpcTransport(String host, int port) {
+        this.host = host;
+        this.port = port;
     }
 
     public Object sendRequest(Request request) throws Exception {
         ServiceDiscovery discovery = SpiUtils.getServiceDiscovery(aClazz);
-        InetSocketAddress socketAddress = discovery.discoverService(request.getServiceName());
+        InetSocketAddress socketAddress = discovery.discoverService(request.getClassName());
         b.remoteAddress(socketAddress);
 
         ChannelFuture f = b.connect().sync();

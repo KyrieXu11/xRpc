@@ -43,7 +43,9 @@ public class AnnotationUtils {
         Map<String,Object> map = new HashMap<>();
         for (Class<?> aClass : aClasses) {
             Object o = aClass.getConstructor().newInstance();
-            map.put(aClass.getName(),o);
+            for (Class<?> aInterface : aClass.getInterfaces()) {
+                map.put(aInterface.getName(),o);
+            }
         }
         return map;
     }

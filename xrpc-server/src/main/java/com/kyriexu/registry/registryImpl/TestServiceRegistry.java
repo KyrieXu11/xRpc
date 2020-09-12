@@ -13,4 +13,9 @@ public class TestServiceRegistry implements ServiceRegistry {
     public void registerService(InetSocketAddress address, String serviceName) {
         System.out.println("服务发现SPI测试成功");
     }
+
+    @Override
+    public void close() {
+
+    }
 }

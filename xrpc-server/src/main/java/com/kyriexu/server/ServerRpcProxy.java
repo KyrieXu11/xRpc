@@ -71,22 +71,16 @@ public class ServerRpcProxy {
     @SneakyThrows
     public void run(Class<?> clazz) {
         Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
-        // 测试通过
-        // publishService(instance.get("com.kyriexu.service.HelloServiceImpl"), port);
         ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
         for (String serviceName : instance.keySet()) {
-            serviceRegistry.registerService(new InetSocketAddress(addr,8080),serviceName);
+            serviceRegistry.registerService(new InetSocketAddress(addr,port),serviceName);
         }
-        // TODO:注册到Zookeeper中去
-        // ServiceRegistry serviceRegistry = new ZkServiceRegistry();
-        // for (String serviceName : instance.keySet()) {
-        //     serviceRegistry.registerService(new InetSocketAddress(port), serviceName);
-        // }
+        run(port);
+        serviceRegistry.close();
     }
 
-    private void publishService(Object service, int port) throws Exception {
+    private void run(int port) throws Exception {
         try {
-            handler.setService(service);
             server.localAddress(new InetSocketAddress(port));
             ChannelFuture f = server.bind().sync();
             System.out.println(ServerRpcProxy.class.getName() + " 开始监听 " + f.channel().localAddress());
