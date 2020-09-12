@@ -5,10 +5,13 @@ import com.kyriexu.enity.Response;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author KyrieXu
@@ -16,18 +19,21 @@ import java.lang.reflect.Method;
  **/
 @ChannelHandler.Sharable
 public class ServiceHandler extends ChannelInboundHandlerAdapter {
+    @Setter
+    private Map<String, Object> registry;
 
     public ServiceHandler() {
+        registry = new HashMap<>();
     }
 
     private Response invoke(Request request) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException, InstantiationException {
         Object[] args = request.getArgs();
         String className = request.getClassName();
-        Class<?> aClass = Class.forName(className);
+        Object service = registry.get(className);
         Class<?>[] parameterTypes = request.getParameterTypes();
-        Method method = aClass.getMethod(request.getMethodName(), parameterTypes);
-        Object data = method.invoke(aClass.getConstructor().newInstance(), args);
-        return new Response(request.getId(),method.getReturnType(), data);
+        Method method = service.getClass().getMethod(request.getMethodName(), parameterTypes);
+        Object data = method.invoke(service, args);
+        return new Response(request.getId(), method.getReturnType(), data);
     }
 
     /**

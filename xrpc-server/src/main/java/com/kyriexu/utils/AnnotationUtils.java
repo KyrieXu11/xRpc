@@ -38,7 +38,7 @@ public class AnnotationUtils {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-    public static Map<String,Object> getInstance(Class<?> aClazz,Class<? extends Annotation> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static synchronized Map<String,Object> getInstance(Class<?> aClazz,Class<? extends Annotation> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Set<Class<?>> aClasses = getAllClass(aClazz, clazz);
         Map<String,Object> map = new HashMap<>();
         for (Class<?> aClass : aClasses) {

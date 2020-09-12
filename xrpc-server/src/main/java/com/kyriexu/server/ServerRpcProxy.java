@@ -31,7 +31,7 @@ import java.util.Map;
 @Slf4j
 public class ServerRpcProxy {
     @Setter
-    private int port = 8080;
+    private int port = 8081;
 
     @Setter
     private String addr = "127.0.0.1";
@@ -73,14 +73,16 @@ public class ServerRpcProxy {
         Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
         ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
         for (String serviceName : instance.keySet()) {
+            System.out.println(serviceName);
             serviceRegistry.registerService(new InetSocketAddress(addr,port),serviceName);
         }
-        run(port);
+        run(port,instance);
         serviceRegistry.close();
     }
 
-    private void run(int port) throws Exception {
+    private void run(int port,Map<String,Object> map) throws Exception {
         try {
+            handler.setRegistry(map);
             server.localAddress(new InetSocketAddress(port));
             ChannelFuture f = server.bind().sync();
             System.out.println(ServerRpcProxy.class.getName() + " 开始监听 " + f.channel().localAddress());
