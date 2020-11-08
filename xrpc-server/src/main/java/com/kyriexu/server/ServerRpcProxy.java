@@ -36,10 +36,10 @@ public class ServerRpcProxy {
     @Setter
     private String addr = "127.0.0.1";
 
-    private NioEventLoopGroup boss;
-    private NioEventLoopGroup worker;
-    private ServerBootstrap server;
-    private ServiceHandler handler;
+    private final NioEventLoopGroup boss;
+    private final NioEventLoopGroup worker;
+    private final ServerBootstrap server;
+    private final ServiceHandler handler;
 
     public ServerRpcProxy() {
         handler = SingletonFactory.getInstance(ServiceHandler.class);
@@ -70,17 +70,20 @@ public class ServerRpcProxy {
 
     @SneakyThrows
     public void run(Class<?> clazz) {
+        // 存放的是 服务名 -> 实例对象
         Map<String, Object> instance = AnnotationUtils.getInstance(clazz, RpcService.class);
+        // 使用了SPI技术获取服务注册中心
         ServiceRegistry serviceRegistry = SpiUtils.getServiceRegistry(clazz);
+        // 这里待优化，zk连接的创建消耗资源，循环应当放在方法里面进行，只进行一次的创建连接
         for (String serviceName : instance.keySet()) {
             System.out.println(serviceName);
-            serviceRegistry.registerService(new InetSocketAddress(addr,port),serviceName);
+            serviceRegistry.registerService(new InetSocketAddress(addr, port), serviceName);
         }
-        run(port,instance);
+        run(port, instance);
         serviceRegistry.close();
     }
 
-    private void run(int port,Map<String,Object> map) throws Exception {
+    private void run(int port, Map<String, Object> map) throws Exception {
         try {
             handler.setRegistry(map);
             server.localAddress(new InetSocketAddress(port));
